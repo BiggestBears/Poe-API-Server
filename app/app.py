@@ -37,7 +37,10 @@ def chat_completions():
 
 @app.route("/v2/driver/sage/models", methods=["GET"])
 def models():
-    p_b_cookie, bot_name = request.authorization.token.split('|', 1)
+    #p_b_cookie, bot_name = request.authorization.token.split('|', 1)
+    Authorization = request.headers.get('Authorization')
+    b, proxy_password = Authorization.split(' ', 1)
+    p_b_cookie, bot_name = proxy_password.split('|', 1)
     if bot_name != config["bot"] or p_b_cookie != config["cookie"]:
         config["bot"] = bot_name
         config["cookie"] = p_b_cookie
