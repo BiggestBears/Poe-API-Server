@@ -1,4 +1,0 @@
-flask
-selenium
-markdownify
-undetected_chromedriver
