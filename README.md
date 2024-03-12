@@ -11,8 +11,9 @@ It can simulate an OpenAI Proxy and be used with SillyTavern.
 
 Python:
 1. Install python 3.11
-2. Start app.py
-3. Wait until it's running and listening (by default to 0.0.0.0:5000)
+2. Install requirements.txt
+3. Start app.py
+4. Wait until it's running and listening (by default to 0.0.0.0:5000)
 
 ~~For Windows you can alternatively also use the [release version](https://github.com/vfnm/Poe-API-Server/releases/latest), just extract it and open the executable file.~~
 
