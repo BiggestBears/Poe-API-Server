@@ -73,7 +73,7 @@ class PoeBot:
         if (config.get("autorefresh", True) == True):
             self.driver.refresh()
             time.sleep(1)
-            self.driver.execute_script("""var xpath = '//*[@id="__next"]/div[1]/div/main/div/div';var scrollElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;scrollElement.scrollTop = scrollElement.scrollHeight;""")
+            self.driver.execute_script("""var xpath = '//*[@id="__next"]/div/div[1]/div/main/div/div';var scrollElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;scrollElement.scrollTop = scrollElement.scrollHeight;""")
         start_time = time.time()
         while wait_for_message:
             latest_message = self.get_latest_message()
