@@ -14,7 +14,7 @@ oai_helper = OpenAIHelper(bot)
 
 #logging.basicConfig(level=logging.DEBUG)
 
-current_version = "0.7"
+current_version = "1.2"
 latest_version = json.loads(urlopen("https://api.github.com/repos/vfnm/Poe-API-Server/releases/latest").read())["tag_name"]
 if (current_version != latest_version):
     print(f"You are running Poe API Server version {current_version} while the latest release is version {latest_version}")
@@ -37,31 +37,11 @@ def chat_completions():
 
 @app.route("/v2/driver/sage/models", methods=["GET"])
 def models():
-    view = "0"
-    if request.authorization.token != None:
-        values =  request.authorization.token.split('|', 2)
-        print(values)
-        p_b_cookie = values[0]
-        bot_name = values[1]
-        if len(values)>2:
-            view = values[2]
-        
-    else:
-        values = request.authorization.parameters["token"].split('|', 2)
-        print(values)
-        p_b_cookie = values[0]
-        bot_name = values[1]
-        if len(values)>2:
-            view = values[2]
-    
+    p_b_cookie, bot_name = request.authorization.token.split('|', 1)
     if bot_name != config["bot"] or p_b_cookie != config["cookie"]:
-        olddriver = bot.get_driver()
         config["bot"] = bot_name
         config["cookie"] = p_b_cookie
-        config["view"] = view
-        config.save()
         bot.start_driver()
-        olddriver.quit()
     return {
         "id" : "1"
     }
@@ -81,11 +61,6 @@ def send_message():
         bot.clear_context()
     bot.send_message(message)
     return {"status": "Message sent"}
-
-@app.route("/del-last", methods=["GET"])
-def del_last():
-    bot.delete_latest_message()
-    return {"status": "Context cleared"}
 
 @app.route("/clear-context", methods=["POST"])
 def clear_context():
