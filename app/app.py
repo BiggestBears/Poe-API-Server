@@ -4,7 +4,6 @@ from openaihelper import OpenAIHelper
 from config import config
 from urllib.request import urlopen
 import json
-import argparse
 #import logging
 
 app = Flask(__name__)
@@ -14,6 +13,13 @@ bot = PoeBot()
 oai_helper = OpenAIHelper(bot)
 
 #logging.basicConfig(level=logging.DEBUG)
+
+current_version = "0.7"
+latest_version = json.loads(urlopen("https://api.github.com/repos/vfnm/Poe-API-Server/releases/latest").read())["tag_name"]
+if (current_version != latest_version):
+    print(f"You are running Poe API Server version {current_version} while the latest release is version {latest_version}")
+else:
+    print(f"Poe API Server {current_version} by vfnm is up to date")
 
 @app.route("/v2/driver/sage/chat/completions", methods=["POST"])
 def chat_completions():
@@ -31,14 +37,31 @@ def chat_completions():
 
 @app.route("/v2/driver/sage/models", methods=["GET"])
 def models():
-    #p_b_cookie, bot_name = request.authorization.token.split('|', 1)
-    Authorization = request.headers.get('Authorization')
-    b, proxy_password = Authorization.split(' ', 1)
-    p_b_cookie, bot_name = proxy_password.split('|', 1)
+    view = "0"
+    if request.authorization.token != None:
+        values =  request.authorization.token.split('|', 2)
+        print(values)
+        p_b_cookie = values[0]
+        bot_name = values[1]
+        if len(values)>2:
+            view = values[2]
+        
+    else:
+        values = request.authorization.parameters["token"].split('|', 2)
+        print(values)
+        p_b_cookie = values[0]
+        bot_name = values[1]
+        if len(values)>2:
+            view = values[2]
+    
     if bot_name != config["bot"] or p_b_cookie != config["cookie"]:
+        olddriver = bot.get_driver()
         config["bot"] = bot_name
         config["cookie"] = p_b_cookie
+        config["view"] = view
+        config.save()
         bot.start_driver()
+        olddriver.quit()
     return {
         "id" : "1"
     }
@@ -58,6 +81,11 @@ def send_message():
         bot.clear_context()
     bot.send_message(message)
     return {"status": "Message sent"}
+
+@app.route("/del-last", methods=["GET"])
+def del_last():
+    bot.delete_latest_message()
+    return {"status": "Context cleared"}
 
 @app.route("/clear-context", methods=["POST"])
 def clear_context():
@@ -87,13 +115,4 @@ def is_generating():
     return {"is_generating": bot.is_generating()}
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-H', '--host', default=config.get("host", "0.0.0.0"))
-    parser.add_argument('-P', '--port', default=config.get("port", 5000))
-
-    args = parser.parse_args()
-
-    host = args.host
-    port = args.port
-
-    app.run(host=host, port=port)
+    app.run(host=config.get("host", "0.0.0.0"), port=config.get("port", 5000))
