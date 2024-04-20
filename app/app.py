@@ -4,6 +4,7 @@ from openaihelper import OpenAIHelper
 from config import config
 from urllib.request import urlopen
 import json
+import argparse
 #import logging
 
 app = Flask(__name__)
@@ -86,4 +87,13 @@ def is_generating():
     return {"is_generating": bot.is_generating()}
 
 if __name__ == "__main__":
-    app.run(host=config.get("host", "0.0.0.0"), port=config.get("port", 5000))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-H', '--host', default=config.get("host", "0.0.0.0"))
+    parser.add_argument('-P', '--port', default=config.get("port", 5000))
+
+    args = parser.parse_args()
+
+    host = args.host
+    port = args.port
+
+    app.run(host=host, port=port)
